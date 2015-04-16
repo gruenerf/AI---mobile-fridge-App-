@@ -28,21 +28,25 @@ var ajax = (function ($) {
 
 		body.on('click', "#home", function () {
 			content.load("view/home.html", function () {
+
 			});
 		});
 
 		body.on('click', "#recipes", function () {
 			content.load("view/recipes.html", function () {
+				websocket.getRecipes();
 			});
 		});
 
 		body.on('click', "#fridge", function () {
 			content.load("view/fridge.html", function () {
+				websocket.getFridgeItems();
 			});
 		});
 
 		body.on('click', "#shoppinglist", function () {
 			content.load("view/shoppinglist.html", function () {
+				websocket.getShoppingList();
 			});
 		});
 	}

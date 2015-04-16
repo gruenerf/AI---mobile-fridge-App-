@@ -10,8 +10,6 @@
 
 var websocket = (function ($) {
 
-	var alle;
-
 	/**
 	 * Singleton instance of websocket connection
 	 */
@@ -47,14 +45,21 @@ var websocket = (function ($) {
 	 */
 	function getRecipes() {
 		con.getInstance().send(JSON.stringify({'get': 'recipes'}));
-		con.getInstance().onmessage = function(msg){
-			var response = msg.data;
-			var json = JSON.parse(response);
+		con.getInstance().onmessage = function (msg) {
+			var recipe_list = $("#select_recipe");
+			var string = "";
 
-			return json;
+			var response = JSON.parse(msg.data);
+			var recipes = response.recipes;
+
+			console.log(recipes);
+			for (var i = 0; i < recipes.length; i++) {
+				string += "<option value=" + recipes[i].name + " >" + recipes[i].name + "</option>";
+			}
+
+			//TODO if empty make other string
+			recipe_list.append(string);
 		};
-
-		return con.getInstance().onmessage;
 	}
 
 	/**
@@ -62,6 +67,23 @@ var websocket = (function ($) {
 	 */
 	function getFridgeItems() {
 		con.getInstance().send(JSON.stringify({'get': 'fridgeItems'}));
+		con.getInstance().onmessage = function (msg) {
+			var fridge_list = $("#fridge_list");
+			var string = "";
+
+			var response = JSON.parse(msg.data);
+			var fridgeItems = response.fridgeItems;
+
+			for (var i = 0; i < fridgeItems.length; i++) {
+				string += "<li>" +
+				"<div class='item_name'>" + fridgeItems[i].name + "</div>" +
+				"<div class='item_percentage'>" + fridgeItems[i].percentage + "</div>" +
+				"<div class='item_size'>" + fridgeItems[i].size + "</div>" +
+				"</li>";
+			}
+
+			fridge_list.append(string);
+		};
 	}
 
 	/**
@@ -104,4 +126,5 @@ var websocket = (function ($) {
 		}
 	};
 
-})(jQuery);
+})
+(jQuery);
