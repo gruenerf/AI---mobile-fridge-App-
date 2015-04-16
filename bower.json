@@ -7,8 +7,7 @@
 	"dependencies": {
 		"modernizr": "*",
 		"jquery": "*",
-		"bootstrap-sass": "*",
-		"requirejs": "*"
+		"bootstrap-sass": "*"
 	},
 	"exportsOverride": {
 		"exportsOverride": {

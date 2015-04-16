@@ -15,13 +15,13 @@ module.exports = {
       import: 2
     },
     //all css-files, including subfolders
-    src: ['<%= package.basedir %>/assets/dist/css/**/*.css']
+    src: ['<%= package.basedir %>assets/dist/css/**/*.css']
   },
   lax: {
     options: {
       import: false
     },
     //all css-files, including subfolders
-    src: ['<%= package.basedir %>/assets/dist/css/**/*.css']
+    src: ['<%= package.basedir %>assets/dist/css/**/*.css']
   }
 };

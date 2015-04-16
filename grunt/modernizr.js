@@ -9,10 +9,10 @@
 module.exports = {
 	dist: {
 		// [REQUIRED] Path to the build you're using for development.
-		"devFile" : "<%= package.basedir %>/assets/src/bower_components/modernizr/modernizr.js",
+		"devFile" : "<%= package.basedir %>assets/src/bower_components/modernizr/modernizr.js",
 
 		// [REQUIRED] Path to save out the built file.
-		"outputFile" : "<%= package.basedir %>/assets/dist/js/vendor/modernizr-custom.js",
+		"outputFile" : "<%= package.basedir %>assets/dist/js/vendor/modernizr-custom.js",
 
 		// Based on default settings on http://modernizr.com/download/
 		"extra" : {
@@ -49,7 +49,7 @@ module.exports = {
 		// You can override this by defining a "files" array below.
 		// NOTE add files here if you develop your own classes in subdirectories
 		"files" : {
-			"src": ['<%= package.basedir %>/assets/src/js/**/*.js']
+			"src": ['<%= package.basedir %>assets/src/js/**/*.js']
 		},
 
 		// When parseFiles = true, matchCommunityTests = true will attempt to

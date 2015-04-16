@@ -13,7 +13,7 @@ module.exports = {
 	install: {
 
 		options: {
-			targetDir: '<%= package.basedir %>/assets/src/bower_components',
+			targetDir: '<%= package.basedir %>assets/src/bower_components',
 
 			//clean download folder
 			cleanup: true,
@@ -24,6 +24,6 @@ module.exports = {
 			verbose: true,
 
 			install: true
-		},
+		}
 	}
 };

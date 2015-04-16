@@ -9,18 +9,18 @@ module.exports = {
 
 	fonts: {
 		expand: true,
-		cwd: '<%= package.basedir %>/assets/src/fonts/',
+		cwd: '<%= package.basedir %>assets/src/fonts/',
 		src: '**',
-		dest: '<%= package.basedir %>/assets/dist/fonts/',
+		dest: '<%= package.basedir %>assets/dist/fonts/',
 		flatten: false,
 		filter: 'isFile',
 	},
 
 	img: {
 		expand: true,
-		cwd: '<%= package.basedir %>/assets/src/img/',
+		cwd: '<%= package.basedir %>assets/src/img/',
 		src: '**',
-		dest: '<%= package.basedir %>/assets/dist/img/',
+		dest: '<%= package.basedir %>assets/dist/img/',
 		flatten: false,
 		filter: 'isFile',
 	}

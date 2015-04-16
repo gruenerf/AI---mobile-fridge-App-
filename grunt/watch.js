@@ -7,7 +7,7 @@ module.exports = {
 
 	sass: {
 		files: [
-			'<%= package.basedir %>/assets/src/css/*.scss',
+			'<%= package.basedir %>assets/src/css/*.scss',
 		],
 		tasks: ['clean:css', 'sass', 'autoprefixer:dist']
 	},
@@ -23,8 +23,8 @@ module.exports = {
 			livereload: true
 		},
 		files: [
-			'<%= package.basedir %>/assets/dist/css/*.css',
-			'<%= package.basedir %>/assets/dist/js/*.js'
+			'<%= package.basedir %>assets/dist/css/*.css',
+			'<%= package.basedir %>assets/dist/js/*.js'
 		]
 	}
 };

@@ -16,10 +16,6 @@ module.exports = function(grunt) {
 	require('load-grunt-config')(grunt, {
 
 		init: true, //auto grunt.initConfig
-		data: { //data passed into config.  Can use with <%= variableName %>
-			variableName: false,
-			secret: grunt.file.readJSON('secret.json')
-		},
 		jitGrunt: {
 			bower: 'grunt-bower-task'
 		}

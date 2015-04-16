@@ -9,14 +9,14 @@
 module.exports = {
 	//clean folders
 	dist: [
-		'<%= package.basedir %>/assets/dist/css/',
-		'<%= package.basedir %>/assets/dist/js/',
-		'<%= package.basedir %>/assets/dist/img/'
+		'<%= package.basedir %>assets/dist/css/',
+		'<%= package.basedir %>assets/dist/js/',
+		'<%= package.basedir %>assets/dist/img/'
 	],
 	css: [
-		'<%= package.basedir %>/assets/dist/css/'
+		'<%= package.basedir %>assets/dist/css/'
 	],
 	js: [
-		'<%= package.basedir %>/assets/dist/js/'
+		'<%= package.basedir %>assets/dist/js/'
 	]
 };

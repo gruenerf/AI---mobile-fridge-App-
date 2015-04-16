@@ -11,7 +11,7 @@ module.exports = {
 	},
 	dist: {
 		files: {
-			'<%= package.basedir %>/assets/dist/css/main.min.css' : '<%= package.basedir %>/assets/dist/css/main.min.css'
+			'<%= package.basedir %>assets/dist/css/main.min.css' : '<%= package.basedir %>assets/dist/css/main.min.css'
 		}
 	},
 
@@ -20,8 +20,8 @@ module.exports = {
 		options: {
 			map: true
 		},
-		src: '<%= package.basedir %>/assets/dist/css/main.min.css',
-		dest: '<%= package.basedir %>/assets/dist/css/main.min.css' // -> dest/css/file.css, dest/css/file.css.map
+		src: '<%= package.basedir %>assets/dist/css/main.min.css',
+		dest: '<%= package.basedir %>assets/dist/css/main.min.css' // -> dest/css/file.css, dest/css/file.css.map
 	}
 
 };
