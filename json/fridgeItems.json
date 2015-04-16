@@ -1,0 +1,7 @@
+{
+	"fridgeItems": [
+		{"name": "Doe", "percentage": "50", "size": "1000ml"},
+		{"name": "Smith", "percentage": "50", "size": "1000ml"},
+		{"name": "Jones", "percentage": "50", "size": "1000ml"}
+	]
+}
