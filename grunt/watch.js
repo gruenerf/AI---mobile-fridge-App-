@@ -7,20 +7,15 @@ module.exports = {
 
 	sass: {
 		files: [
-			'<%= package.basedir %>/assets/src/sass/*.scss',
-
-			//either include all scss-files or do it selectively (the latter is recommended...)
-			'<%= package.basedir %>/assets/src/bower_components/bootstrap-sass/scss/*.scss',
-
-			'<%= package.basedir %>/assets/src/scss/iconfont/*.scss'
+			'<%= package.basedir %>/assets/src/css/*.scss',
 		],
-		tasks: ['clean:css', 'newer:sass:development', 'newer:autoprefixer:dist', 'version']
+		tasks: ['clean:css', 'sass', 'autoprefixer:dist']
 	},
 	js: {
 		files: [
 			'<%= jshint.all %>'
 		],
-		tasks: ['clean:js', 'newer:jshint', 'concat', 'uglify:development', 'version', 'notify:watch']
+		tasks: ['clean:js', 'jshint', 'concat', 'uglify']
 	},
 	livereload: {
 		// Browser live reloading
@@ -29,10 +24,7 @@ module.exports = {
 		},
 		files: [
 			'<%= package.basedir %>/assets/dist/css/*.css',
-			'<%= package.basedir %>/assets/dist/js/*.js',
-			'<%= package.basedir %>/assets/dist/img/*.*',
-			'<%= package.basedir %>/templates/*.php',
-			'<%= package.basedir %>/*.php'
+			'<%= package.basedir %>/assets/dist/js/*.js'
 		]
 	}
 };

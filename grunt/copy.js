@@ -14,5 +14,14 @@ module.exports = {
 		dest: '<%= package.basedir %>/assets/dist/fonts/',
 		flatten: false,
 		filter: 'isFile',
+	},
+
+	img: {
+		expand: true,
+		cwd: '<%= package.basedir %>/assets/src/img/',
+		src: '**',
+		dest: '<%= package.basedir %>/assets/dist/img/',
+		flatten: false,
+		filter: 'isFile',
 	}
 };
