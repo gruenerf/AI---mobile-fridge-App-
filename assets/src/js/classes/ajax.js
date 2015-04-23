@@ -11,11 +11,10 @@
 var ajax = (function ($) {
 
 	/**
-	 * Initializing function, loads initial view
+	 * Initializing function
 	 */
 	function init() {
-		var content = $("#content");
-		content.load("view/home.html");
+
 	}
 
 	/**
@@ -34,7 +33,6 @@ var ajax = (function ($) {
 
 		body.on('click', "#recipes", function () {
 			content.load("view/recipes.html", function () {
-				websocket.getRecipes();
 			});
 		});
 
@@ -46,15 +44,57 @@ var ajax = (function ($) {
 
 		body.on('click', "#shoppinglist", function () {
 			content.load("view/shoppinglist.html", function () {
+
 				websocket.getShoppingList();
 			});
 		});
+
+		body.on('click', "#addNewRecipe", function () {
+			content.load("view/addNewRecipe.html", function () {
+				websocket.getRecipes();
+				date.init();
+			});
+		});
+	}
+
+	/**
+	 * Loads an Error screen
+	 */
+	function loadError() {
+		var content = $("#content");
+		var body = $("body");
+
+		content.load("view/error.html", function () {
+			body.css("background","#ffffff");
+			content.show();
+		});
+	}
+
+	/**
+	 * Loads the Homescreen
+	 */
+	function loadHomeScreen() {
+		var content = $("#content");
+		var header = $("#header");
+		var body = $("body");
+
+		header.load("view/header.html");
+		header.show();
+		body.css("background","#ffffff");
+		content.load("view/home.html");
+		content.show();
 	}
 
 	return {
 		init: function () {
 			init();
 			reload();
+		},
+		loadError: function () {
+			loadError();
+		},
+		loadHomeScreen : function() {
+			loadHomeScreen();
 		}
 	};
 

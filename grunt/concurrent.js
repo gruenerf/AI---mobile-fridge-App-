@@ -13,7 +13,7 @@ module.exports = {
 	//linting of source javascript, cleaning of distribution folder
 	//install bower components via task instead of directly calling "bower install"
 	//this way, all files are set up in the correct location (which is set up via package.json)
-	first: ['jshint', 'clean:dist', 'modernizr'],
+	first: ['jshint', 'clean:dist', 'modernizr:dist'],
 
 	//generate css files, sprites and optimize images, concatenate javascript files
 	//concatened scripts will be used for unit testing in next step

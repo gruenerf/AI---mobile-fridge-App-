@@ -1,7 +1,7 @@
 /**
  * This file handels all calls to the websocket
  *
- * @class ajax
+ * @class websocket
  * @static
  * @author Ferdinand Grüner
  * @version  1.0
@@ -12,13 +12,13 @@ var websocket = (function ($) {
 
 	/**
 	 * Singleton instance of websocket connection
+	 * TODO if connection files loading screen
 	 */
 	var con = (function () {
 		var con;
 
 		function createInstance() {
-			var con = new WebSocket('ws://128.39.82.37:9999/ws');
-			return con;
+			return new WebSocket('ws://37.235.60.89:9999/ws');
 		}
 
 		return {
@@ -32,12 +32,52 @@ var websocket = (function ($) {
 	})();
 
 	/**
-	 * Initializing function, logs when connection is established
+	 * Initializing function
 	 */
 	function init() {
-		con.getInstance().onmessage = function (msg) {
-			return msg.data;
+		var connection = con.getInstance();
+
+		connection.onerror = function (event) {
+			throwConnectionError();
 		};
+
+		waitForSocketConnection(connection, 0);
+	}
+
+	/**
+	 * Removes loading screen and shows content
+	 */
+	function loadHomeScreen() {
+		$("#loading").hide();
+		ajax.loadHomeScreen();
+	}
+
+	/**
+	 * Function that waits until Connection is established or it times out after 15sec
+	 * @param socket
+	 * @param times
+	 */
+	function waitForSocketConnection(socket, times) {
+		setTimeout(
+			function () {
+				if (socket.readyState === 1) {
+					loadHomeScreen();
+
+				} else if (times === 30) {
+					throwConnectionError();
+				} else {
+					waitForSocketConnection(socket, ++times);
+				}
+
+			}, 500); // wait 500 milliseconds for the connection...
+	}
+
+	/**
+	 * Throws an error when connection can´t be established
+	 */
+	function throwConnectionError() {
+		$("#loading").hide();
+		ajax.loadError();
 	}
 
 	/**
@@ -52,12 +92,14 @@ var websocket = (function ($) {
 			var response = JSON.parse(msg.data);
 			var recipes = response.recipes;
 
-			console.log(recipes);
-			for (var i = 0; i < recipes.length; i++) {
-				string += "<option value=" + recipes[i].name + " >" + recipes[i].name + "</option>";
+			if (recipes.length) {
+				for (var i = 0; i < recipes.length; i++) {
+					string += "<option value=" + recipes[i].name + " >" + recipes[i].name + "</option>";
+				}
+			} else {
+				string = "<option>No recipes so far.</option>";
 			}
 
-			//TODO if empty make other string
 			recipe_list.append(string);
 		};
 	}
@@ -74,11 +116,19 @@ var websocket = (function ($) {
 			var response = JSON.parse(msg.data);
 			var fridgeItems = response.fridgeItems;
 
-			for (var i = 0; i < fridgeItems.length; i++) {
-				string += "<li>" +
-				"<div class='item_name'>" + fridgeItems[i].name + "</div>" +
-				"<div class='item_percentage'>" + fridgeItems[i].percentage + "</div>" +
-				"<div class='item_size'>" + fridgeItems[i].size + "</div>" +
+			if (fridgeItems.length) {
+				for (var i = 0; i < fridgeItems.length; i++) {
+					string += "<div class='fridge_item'>" +
+					"<div class='item_data'>" +
+					"<div class='item_name'>" + fridgeItems[i].name + "</div>" +
+					"<div class='item_size'>" + (fridgeItems[i].size * fridgeItems[i].percentage / 100) + fridgeItems[i].unit + "</div>" +
+					"</div>" +
+					"<div class='item_percentage' style='height:" + fridgeItems[i].percentage + "%'></div>" +
+					"</div>";
+				}
+			} else {
+				string = "<li>" +
+				"<div class='item_name'>Currently no fridge items.</div>" +
 				"</li>";
 			}
 
@@ -105,7 +155,28 @@ var websocket = (function ($) {
 		var recipeString = JSON.stringify({"get": "shoppingList", "recipes": recipes});
 
 		con.getInstance().send(recipeString);
-		return con.getInstance().onmessage(msg);
+		con.getInstance().onmessage = function (msg) {
+			var shopping_list = $("#shopping_list");
+			var string = "";
+
+			var response = JSON.parse(msg.data);
+			var shoppingList = response.shoppingList;
+
+			if (shoppingList.length) {
+				for (var i = 0; i < shoppingList.length; i++) {
+					string += "<tr>" +
+						"<td class='item_name'>" + shoppingList[i].name + "</td>" +
+						"<td class='item_size'>" + shoppingList[i].size + shoppingList[i].unit + "</td>" +
+					"</tr>";
+				}
+			} else {
+				string = "<tr>" +
+					"<td class='item_name'>No recommendations so far.</td>" +
+				"</tr>";
+			}
+
+			shopping_list.append(string);
+		};
 	}
 
 	return {
