@@ -39,6 +39,7 @@ var ajax = (function ($) {
 
 		body.on('click', "#recipes", function () {
 			content.load("view/recipes.html", function () {
+				recipe.getAll();
 			});
 		});
 
@@ -50,7 +51,6 @@ var ajax = (function ($) {
 
 		body.on('click', "#shoppinglist", function () {
 			content.load("view/shoppinglist.html", function () {
-
 				websocket.getShoppingList();
 			});
 		});
@@ -59,6 +59,7 @@ var ajax = (function ($) {
 			content.load("view/addNewRecipe.html", function () {
 				websocket.getRecipes();
 				date.init();
+				recipe.addNew();
 			});
 		});
 	}
@@ -71,7 +72,7 @@ var ajax = (function ($) {
 		var body = $("body");
 
 		content.load("view/error.html", function () {
-			body.css("background","#ffffff");
+			body.css("background", "#ffffff");
 			content.show();
 		});
 	}
@@ -86,9 +87,20 @@ var ajax = (function ($) {
 
 		header.load("view/header.html");
 		header.show();
-		body.css("background","#ffffff");
+		body.css("background", "#ffffff");
 		content.load("view/home.html");
 		content.show();
+	}
+
+	/**
+	 * Loads an Error screen
+	 */
+	function loadRecipes() {
+		var content = $("#content");
+
+		content.load("view/recipes.html", function () {
+			recipe.getAll();
+		});
 	}
 
 	return {
@@ -99,8 +111,11 @@ var ajax = (function ($) {
 		loadError: function () {
 			loadError();
 		},
-		loadHomeScreen : function() {
+		loadHomeScreen: function () {
 			loadHomeScreen();
+		},
+		loadRecipes: function () {
+			loadRecipes();
 		}
 	};
 
@@ -114,12 +129,12 @@ var ajax = (function ($) {
  * @return {Object} init-Function
  */
 
-var date = (function($){
+var date = (function ($) {
 
 	/**
 	 * Initializing function
 	 */
-	function init(){
+	function init() {
 		/**
 		 * Function that defines the difference between two dates
 		 * @param datepart
@@ -148,25 +163,11 @@ var date = (function($){
 			inline: true,
 			firstDay: 1,
 			showOtherMonths: true,
-			dayNamesMin: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'],
+			dayNamesMin: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
 			monthNames: ['January', 'February', 'March', 'April', 'May', 'June',
 				'July', 'August', 'September', 'October', 'November', 'December'],
 			dateFormat: 'dd.mm.yy',
-			minDate: new Date(),
-
-			onSelect: function (dateText, inst) {
-				//selected date
-				var selectedDate = $(this).datepicker('getDate');
-
-				//current date
-				var date = new Date();
-
-				//save difference in sessionstorage
-				sessionStorage.calendar = Date.dateDiff('d', date, selectedDate);
-
-				//if selected change to page with selected date
-				$.mobile.pageContainer.pagecontainer("change", "randomday.html", {transition: "none"});
-			}
+			minDate: new Date()
 		});
 	}
 
@@ -189,16 +190,88 @@ var date = (function($){
 var recipe = (function ($) {
 
 	/**
+	 * Defines a recipe object
+	 * @param id
+	 * @param date
+	 * @param name
+	 */
+	function Recipe(id, date, name) {
+		this.id = id;
+		this.date = date;
+		this.name = name;
+	}
+
+	function retrieveRecipes() {
+		var storageString = localStorage.recipes;
+		var splitString = storageString.split(";");
+		var storageArray = [];
+		for (var i = 0; i < splitString.length; i++) {
+			if (splitString[i] !== '') {
+				storageArray.push(getJson(splitString[i]));
+			}
+		}
+		return storageArray;
+	}
+
+	function toJson(object) {
+		return JSON.stringify(object);
+	}
+
+	function getJson(object) {
+		return JSON.parse(object);
+	}
+
+	/**
 	 * Initializing function
 	 */
-	function init(){
+	function addNew() {
+		$('#addNew').click(function () {
+			var date = $('#calendar').val();
+			var recipe = $("#select_recipe").val();
+			if (date !== undefined && recipe !== null) {
+				var counter = localStorage.recipes !== undefined ? retrieveRecipes()[retrieveRecipes().length - 1].id : 0;
+				var object = new Recipe(++counter, date, recipe);
+				localStorage.recipes = localStorage.recipes === undefined ? '' : localStorage.recipes;
+				localStorage.recipes += toJson(object) + ';';
+				ajax.loadRecipes();
+			}
+			else {
+				$("#add_new_error").empty().append("Fill out both fields.");
+			}
+		});
+	}
 
+	function getAllRecipes() {
+		var recipeArray = retrieveRecipes();
+		var string = "";
+
+		if (recipeArray.length) {
+			for (var i = 0; i < recipeArray.length; i++) {
+				string += "<div class='recipe_item'>" +
+				"<div class='item_name'>" + recipeArray[i].name + "</div>" +
+				"<div class='item_date'>" + recipeArray[i].date + "</div>" +
+				"<div class='delete' data-id='" + recipeArray[i].id + "'>delete</div>" +
+				"</div>";
+			}
+		} else {
+			string = "<div class='recipe_item'>" +
+			"<div class='item_name'>Currently no recipes.</div>" +
+			"</div>";
+		}
+
+		$(".recipe_list").append(string);
 	}
 
 
 	return {
 		init: function () {
-			init();
+
+		},
+		addNew: function () {
+			addNew();
+		},
+		getAll: function () {
+			getAllRecipes();
 		}
 	};
 })(jQuery);;/**
@@ -241,7 +314,8 @@ var websocket = (function ($) {
 		var connection = con.getInstance();
 
 		connection.onerror = function (event) {
-			throwConnectionError();
+			//throwConnectionError();
+			loadHomeScreen();
 		};
 
 		waitForSocketConnection(connection, 0);
@@ -266,8 +340,9 @@ var websocket = (function ($) {
 				if (socket.readyState === 1) {
 					loadHomeScreen();
 
-				} else if (times === 30) {
-					throwConnectionError();
+				} else if (times === 0) {
+					//throwConnectionError();
+					loadHomeScreen();
 				} else {
 					waitForSocketConnection(socket, ++times);
 				}
@@ -287,56 +362,60 @@ var websocket = (function ($) {
 	 * Returns the server Response with all recipes
 	 */
 	function getRecipes() {
-		con.getInstance().send(JSON.stringify({'get': 'recipes'}));
-		con.getInstance().onmessage = function (msg) {
-			var recipe_list = $("#select_recipe");
-			var string = "";
+		if (con.getInstance().readyState === 1) {
+			con.getInstance().send(JSON.stringify({'get': 'recipes'}));
+			con.getInstance().onmessage = function (msg) {
+				var recipe_list = $("#select_recipe");
+				var string = "";
 
-			var response = JSON.parse(msg.data);
-			var recipes = response.recipes;
+				var response = JSON.parse(msg.data);
+				var recipes = response.recipes;
 
-			if (recipes.length) {
-				for (var i = 0; i < recipes.length; i++) {
-					string += "<option value=" + recipes[i].name + " >" + recipes[i].name + "</option>";
+				if (recipes.length) {
+					for (var i = 0; i < recipes.length; i++) {
+						string += "<option value=" + recipes[i].name + " >" + recipes[i].name + "</option>";
+					}
+				} else {
+					string = "<option>No recipes so far.</option>";
 				}
-			} else {
-				string = "<option>No recipes so far.</option>";
-			}
 
-			recipe_list.append(string);
-		};
+				recipe_list.append(string);
+			};
+		}
 	}
 
 	/**
 	 * Returns the server Response with all current fridge items
 	 */
 	function getFridgeItems() {
-		con.getInstance().send(JSON.stringify({'get': 'fridgeItems'}));
-		con.getInstance().onmessage = function (msg) {
-			var fridge_list = $("#fridge_list");
-			var string = "";
+		if (con.getInstance().readyState === 1) {
+			con.getInstance().send(JSON.stringify({'get': 'fridgeItems'}));
+			con.getInstance().onmessage = function (msg) {
+				var fridge_list = $("#fridge_list");
+				var string = "";
 
-			var response = JSON.parse(msg.data);
-			var fridgeItems = response.fridgeItems;
+				var response = JSON.parse(msg.data);
+				var fridgeItems = response.fridgeItems;
 
-			if (fridgeItems.length) {
-				for (var i = 0; i < fridgeItems.length; i++) {
-					string += "<div class='fridge_item'>" +
-					"<div class='item_data'>" +
-					"<div class='item_name'>" + fridgeItems[i].name + "</div>" +
-					"<div class='item_size'>" + (fridgeItems[i].size * fridgeItems[i].percentage / 100) + fridgeItems[i].unit + "</div>" +
-					"</div>" +
-					"<div class='item_percentage' style='height:" + fridgeItems[i].percentage + "%'></div>" +
+				if (fridgeItems.length) {
+					for (var i = 0; i < fridgeItems.length; i++) {
+						string += "<div class='fridge_item'>" +
+						"<div class='item_data'>" +
+						"<div class='item_name'>" + fridgeItems[i].name + "</div>" +
+						"<div class='item_size'>" + (fridgeItems[i].size * fridgeItems[i].percentage / 100) + fridgeItems[i].unit + "</div>" +
+						"</div>" +
+						"<div class='item_percentage' style='height:" + fridgeItems[i].percentage + "%'></div>" +
+						"</div>";
+					}
+				} else {
+					string = "<div class='fridge_item'>" +
+					"<div class='item_name'>Currently no fridge items.</div>" +
 					"</div>";
 				}
-			} else {
-				string = "<li>" +
-				"<div class='item_name'>Currently no fridge items.</div>" +
-				"</li>";
-			}
 
-			fridge_list.append(string);
-		};
+				fridge_list.append(string);
+			};
+		}
 	}
 
 	/**
@@ -357,29 +436,31 @@ var websocket = (function ($) {
 
 		var recipeString = JSON.stringify({"get": "shoppingList", "recipes": recipes});
 
-		con.getInstance().send(recipeString);
-		con.getInstance().onmessage = function (msg) {
-			var shopping_list = $("#shopping_list");
-			var string = "";
+		if (con.getInstance().readyState === 1) {
+			con.getInstance().send(recipeString);
+			con.getInstance().onmessage = function (msg) {
+				var shopping_list = $("#shopping_list");
+				var string = "";
 
-			var response = JSON.parse(msg.data);
-			var shoppingList = response.shoppingList;
+				var response = JSON.parse(msg.data);
+				var shoppingList = response.shoppingList;
 
-			if (shoppingList.length) {
-				for (var i = 0; i < shoppingList.length; i++) {
-					string += "<tr>" +
+				if (shoppingList.length) {
+					for (var i = 0; i < shoppingList.length; i++) {
+						string += "<tr>" +
 						"<td class='item_name'>" + shoppingList[i].name + "</td>" +
 						"<td class='item_size'>" + shoppingList[i].size + shoppingList[i].unit + "</td>" +
+						"</tr>";
+					}
+				} else {
+					string = "<tr>" +
+					"<td class='item_name'>No recommendations so far.</td>" +
 					"</tr>";
 				}
-			} else {
-				string = "<tr>" +
-					"<td class='item_name'>No recommendations so far.</td>" +
-				"</tr>";
-			}
 
-			shopping_list.append(string);
-		};
+				shopping_list.append(string);
+			};
+		}
 	}
 
 	return {
@@ -421,6 +502,7 @@ var main = function ( $ ) {
 		init : function() {
 			ajax.init();
 			websocket.init();
+			recipe.init();
 		}
 	};
 

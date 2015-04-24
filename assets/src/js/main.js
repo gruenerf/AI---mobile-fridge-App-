@@ -18,6 +18,7 @@ var main = function ( $ ) {
 		init : function() {
 			ajax.init();
 			websocket.init();
+			recipe.init();
 		}
 	};
 

@@ -33,6 +33,7 @@ var ajax = (function ($) {
 
 		body.on('click', "#recipes", function () {
 			content.load("view/recipes.html", function () {
+				recipe.getAll();
 			});
 		});
 
@@ -44,7 +45,6 @@ var ajax = (function ($) {
 
 		body.on('click', "#shoppinglist", function () {
 			content.load("view/shoppinglist.html", function () {
-
 				websocket.getShoppingList();
 			});
 		});
@@ -53,6 +53,7 @@ var ajax = (function ($) {
 			content.load("view/addNewRecipe.html", function () {
 				websocket.getRecipes();
 				date.init();
+				recipe.addNew();
 			});
 		});
 	}
@@ -65,7 +66,7 @@ var ajax = (function ($) {
 		var body = $("body");
 
 		content.load("view/error.html", function () {
-			body.css("background","#ffffff");
+			body.css("background", "#ffffff");
 			content.show();
 		});
 	}
@@ -80,9 +81,20 @@ var ajax = (function ($) {
 
 		header.load("view/header.html");
 		header.show();
-		body.css("background","#ffffff");
+		body.css("background", "#ffffff");
 		content.load("view/home.html");
 		content.show();
+	}
+
+	/**
+	 * Loads an Error screen
+	 */
+	function loadRecipes() {
+		var content = $("#content");
+
+		content.load("view/recipes.html", function () {
+			recipe.getAll();
+		});
 	}
 
 	return {
@@ -93,8 +105,11 @@ var ajax = (function ($) {
 		loadError: function () {
 			loadError();
 		},
-		loadHomeScreen : function() {
+		loadHomeScreen: function () {
 			loadHomeScreen();
+		},
+		loadRecipes: function () {
+			loadRecipes();
 		}
 	};
 

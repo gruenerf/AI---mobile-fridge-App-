@@ -8,12 +8,12 @@
  * @return {Object} init-Function
  */
 
-var date = (function($){
+var date = (function ($) {
 
 	/**
 	 * Initializing function
 	 */
-	function init(){
+	function init() {
 		/**
 		 * Function that defines the difference between two dates
 		 * @param datepart
@@ -42,25 +42,11 @@ var date = (function($){
 			inline: true,
 			firstDay: 1,
 			showOtherMonths: true,
-			dayNamesMin: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'],
+			dayNamesMin: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
 			monthNames: ['January', 'February', 'March', 'April', 'May', 'June',
 				'July', 'August', 'September', 'October', 'November', 'December'],
 			dateFormat: 'dd.mm.yy',
-			minDate: new Date(),
-
-			onSelect: function (dateText, inst) {
-				//selected date
-				var selectedDate = $(this).datepicker('getDate');
-
-				//current date
-				var date = new Date();
-
-				//save difference in sessionstorage
-				sessionStorage.calendar = Date.dateDiff('d', date, selectedDate);
-
-				//if selected change to page with selected date
-				$.mobile.pageContainer.pagecontainer("change", "randomday.html", {transition: "none"});
-			}
+			minDate: new Date()
 		});
 	}
 

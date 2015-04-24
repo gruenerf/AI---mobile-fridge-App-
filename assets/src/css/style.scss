@@ -261,11 +261,88 @@ body {
 					text-align: left;
 					border-bottom: 2px dashed $color_font;
 
-					&:first-child{
+					&:first-child {
 						border-right: 2px dashed $color_font;
 					}
 				}
 			}
 		}
+
+		.addNew {
+
+			#add_new_error{
+				color: $color_shadow;
+			}
+
+			.select {
+				border-radius: 0;
+				background: #ffffff;
+				border: 1px solid black;
+				font-size: 20px;
+				font-family: $font;
+				margin-bottom: 10px;
+			}
+
+			.calendar_headline , #add_new_error{
+				font-size: 20px;
+				margin-top: 15px;
+				margin-bottom: 10px;
+			}
+
+			#calendar {
+				border: 1px solid black;
+				border-radius: 5px;
+				padding: 10px;
+				display: inline-block;
+				font-size: 18px;
+
+				.ui-datepicker {
+					td {
+						line-height: 30px;
+					}
+				}
+
+				.ui-datepicker-title {
+					span {
+						font-size: 20px;
+					}
+				}
+
+				.ui-datepicker-unselectable {
+					.ui-state-default {
+						color: #999999;
+					}
+				}
+
+				.ui-state-default {
+					color: $color_font;
+				}
+
+				.ui-state-active {
+					background: $color_shadow;
+				}
+
+				.ui-datepicker-prev.ui-state-disabled {
+					display: none;
+				}
+
+				.ui-icon-circle-triangle-w {
+					background-image: url("../img/left.png");
+				}
+				.ui-icon-circle-triangle-e {
+					background-image: url("../img/right.png");
+				}
+
+				.ui-icon-circle-triangle-e, .ui-icon-circle-triangle-w {
+					height: 20px;
+					width: 20px;
+				}
+			}
+
+			.plus {
+				margin-top: 15px;
+			}
+		}
+
 	}
 }
