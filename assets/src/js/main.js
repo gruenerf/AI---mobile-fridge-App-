@@ -19,6 +19,7 @@ var main = function ( $ ) {
 			ajax.init();
 			websocket.init();
 			recipe.init();
+			settings.init();
 		}
 	};
 

@@ -12,13 +12,19 @@ var websocket = (function ($) {
 
 	/**
 	 * Singleton instance of websocket connection
-	 * TODO if connection files loading screen
 	 */
 	var con = (function () {
 		var con;
 
 		function createInstance() {
-			return new WebSocket('ws://37.235.60.89:9999/ws');
+			var websocket = new WebSocket('ws://37.235.60.89:9999/ws');
+
+			websocket.onerror = function (event) {
+				//throwConnectionError();
+				loadHomeScreen();
+			};
+
+			return websocket;
 		}
 
 		return {
@@ -36,11 +42,6 @@ var websocket = (function ($) {
 	 */
 	function init() {
 		var connection = con.getInstance();
-
-		connection.onerror = function (event) {
-			//throwConnectionError();
-			loadHomeScreen();
-		};
 
 		waitForSocketConnection(connection, 0);
 	}
@@ -97,7 +98,7 @@ var websocket = (function ($) {
 
 				if (recipes.length) {
 					for (var i = 0; i < recipes.length; i++) {
-						string += "<option value=" + recipes[i].name + " >" + recipes[i].name + "</option>";
+						string += "<option value='" + recipes[i].name + "' >" + recipes[i].name + "</option>";
 					}
 				} else {
 					string = "<option>No recipes so far.</option>";

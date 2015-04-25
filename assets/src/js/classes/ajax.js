@@ -33,7 +33,7 @@ var ajax = (function ($) {
 
 		body.on('click', "#recipes", function () {
 			content.load("view/recipes.html", function () {
-				recipe.getAll();
+				recipe.recipe();
 			});
 		});
 
@@ -46,6 +46,12 @@ var ajax = (function ($) {
 		body.on('click', "#shoppinglist", function () {
 			content.load("view/shoppinglist.html", function () {
 				websocket.getShoppingList();
+			});
+		});
+
+		body.on('click', "#settings", function () {
+			content.load("view/settings.html", function () {
+				settings.setSettings();
 			});
 		});
 
@@ -87,13 +93,25 @@ var ajax = (function ($) {
 	}
 
 	/**
-	 * Loads an Error screen
+	 * Loads an Recipe screen
 	 */
 	function loadRecipes() {
 		var content = $("#content");
 
 		content.load("view/recipes.html", function () {
-			recipe.getAll();
+			recipe.recipe();
+		});
+	}
+
+	/**
+	 * Loads an Settings
+	 */
+	function loadSettings() {
+		var content = $("#content");
+
+		content.load("view/settings.html", function () {
+			settings.setSettings();
+			settings.update();
 		});
 	}
 
@@ -110,6 +128,9 @@ var ajax = (function ($) {
 		},
 		loadRecipes: function () {
 			loadRecipes();
+		},
+		loadSettings: function () {
+			loadSettings();
 		}
 	};
 

@@ -39,7 +39,7 @@ var ajax = (function ($) {
 
 		body.on('click', "#recipes", function () {
 			content.load("view/recipes.html", function () {
-				recipe.getAll();
+				recipe.recipe();
 			});
 		});
 
@@ -52,6 +52,12 @@ var ajax = (function ($) {
 		body.on('click', "#shoppinglist", function () {
 			content.load("view/shoppinglist.html", function () {
 				websocket.getShoppingList();
+			});
+		});
+
+		body.on('click', "#settings", function () {
+			content.load("view/settings.html", function () {
+				settings.setSettings();
 			});
 		});
 
@@ -93,13 +99,25 @@ var ajax = (function ($) {
 	}
 
 	/**
-	 * Loads an Error screen
+	 * Loads an Recipe screen
 	 */
 	function loadRecipes() {
 		var content = $("#content");
 
 		content.load("view/recipes.html", function () {
-			recipe.getAll();
+			recipe.recipe();
+		});
+	}
+
+	/**
+	 * Loads an Settings
+	 */
+	function loadSettings() {
+		var content = $("#content");
+
+		content.load("view/settings.html", function () {
+			settings.setSettings();
+			settings.update();
 		});
 	}
 
@@ -116,6 +134,9 @@ var ajax = (function ($) {
 		},
 		loadRecipes: function () {
 			loadRecipes();
+		},
+		loadSettings: function () {
+			loadSettings();
 		}
 	};
 
@@ -187,6 +208,10 @@ var date = (function ($) {
  */
 
 
+/**
+ * TODO function, that easch time the app start updates local storage regarding old recipes
+ */
+
 var recipe = (function ($) {
 
 	/**
@@ -201,6 +226,10 @@ var recipe = (function ($) {
 		this.name = name;
 	}
 
+	/**
+	 * Get recipe Array out of local storage
+	 * @returns {Array}
+	 */
 	function retrieveRecipes() {
 		var storageString = localStorage.recipes;
 		var splitString = storageString.split(";");
@@ -213,10 +242,20 @@ var recipe = (function ($) {
 		return storageArray;
 	}
 
+	/**
+	 * Transfers object to json
+	 * @param object
+	 * @returns {*}
+	 */
 	function toJson(object) {
 		return JSON.stringify(object);
 	}
 
+	/**
+	 * Returns parsed Json
+	 * @param object
+	 * @returns {*}
+	 */
 	function getJson(object) {
 		return JSON.parse(object);
 	}
@@ -241,37 +280,127 @@ var recipe = (function ($) {
 		});
 	}
 
+	/**
+	 * Returns all Recipes
+	 */
 	function getAllRecipes() {
 		var recipeArray = retrieveRecipes();
 		var string = "";
 
 		if (recipeArray.length) {
+			string += "<tr>" +
+			"<td>Recipe</td>" +
+			"<td>Date</td>" +
+			"<td>Delete</td>" +
+			"</tr>";
 			for (var i = 0; i < recipeArray.length; i++) {
-				string += "<div class='recipe_item'>" +
-				"<div class='item_name'>" + recipeArray[i].name + "</div>" +
-				"<div class='item_date'>" + recipeArray[i].date + "</div>" +
-				"<div class='delete' data-id='" + recipeArray[i].id + "'>delete</div>" +
-				"</div>";
+				string += "<tr class='recipe_item'>" +
+				"<td class='item_name'>" + recipeArray[i].name + "</td>" +
+				"<td class='item_date'>" + recipeArray[i].date + "</td>" +
+				"<td class='item_delete' data-id='" + recipeArray[i].id + "'>delete</td>" +
+				"</tr>";
 			}
 		} else {
-			string = "<div class='recipe_item'>" +
-			"<div class='item_name'>Currently no recipes.</div>" +
-			"</div>";
+			string = "<tr class='no_items'>" +
+			"<td>Currently no recipes.</td>" +
+			"</tr>";
 		}
 
 		$(".recipe_list").append(string);
 	}
 
+	/**
+	 * Deletes a Recipe with a certian id out of json in localstorage
+	 */
+	function deleteRecipe() {
+		$(".item_delete").click(function () {
+			var id = $(this).data("id");
+			var recipeArray = retrieveRecipes();
+
+			if (recipeArray.length) {
+				recipeArray = $.grep(recipeArray, function (n, i) {
+					return n.id !== id;
+				});
+			}
+
+			localStorage.removeItem('recipes');
+			localStorage.recipes = '';
+
+			if (recipeArray.length) {
+				for (var i = 0; i < recipeArray.length; i++) {
+					localStorage.recipes += toJson(recipeArray[i]) + ';';
+				}
+			}
+
+			ajax.loadRecipes();
+		});
+	}
+
 
 	return {
 		init: function () {
-
 		},
 		addNew: function () {
 			addNew();
 		},
-		getAll: function () {
+		recipe: function () {
 			getAllRecipes();
+			deleteRecipe();
+		},
+		getAll: function () {
+			return retrieveRecipes();
+		}
+	};
+})(jQuery);;/**
+ * Settings
+ *
+ * @class settings
+ * @static
+ * @author Ferdinand Grüner
+ * @version  1.0
+ * @return {Object} init-Function
+ */
+
+
+var settings = (function ($) {
+
+
+	/**
+	 * Initializing function
+	 */
+	function init() {
+		localStorage.days = localStorage.days === undefined ? 7 : localStorage.days;
+	}
+
+	/**
+	 * Set number of days when clicked on save
+	 */
+	function setSettings() {
+		$("#number_input").val(localStorage.days);
+
+		$("#settings_save").click(function(){
+			localStorage.days =  $("#number_input").val();
+			ajax.loadSettings();
+		});
+	}
+
+	/**
+	 * Prints out notification when successfully updated
+	 */
+	function update() {
+		$("#settings_notification").empty().append("Number of days updated.");
+	}
+
+
+	return {
+		init: function () {
+			init();
+		},
+		setSettings: function () {
+			setSettings();
+		},
+		update: function(){
+			update();
 		}
 	};
 })(jQuery);;/**
@@ -288,13 +417,19 @@ var websocket = (function ($) {
 
 	/**
 	 * Singleton instance of websocket connection
-	 * TODO if connection files loading screen
 	 */
 	var con = (function () {
 		var con;
 
 		function createInstance() {
-			return new WebSocket('ws://37.235.60.89:9999/ws');
+			var websocket = new WebSocket('ws://37.235.60.89:9999/ws');
+
+			websocket.onerror = function (event) {
+				//throwConnectionError();
+				loadHomeScreen();
+			};
+
+			return websocket;
 		}
 
 		return {
@@ -312,11 +447,6 @@ var websocket = (function ($) {
 	 */
 	function init() {
 		var connection = con.getInstance();
-
-		connection.onerror = function (event) {
-			//throwConnectionError();
-			loadHomeScreen();
-		};
 
 		waitForSocketConnection(connection, 0);
 	}
@@ -373,7 +503,7 @@ var websocket = (function ($) {
 
 				if (recipes.length) {
 					for (var i = 0; i < recipes.length; i++) {
-						string += "<option value=" + recipes[i].name + " >" + recipes[i].name + "</option>";
+						string += "<option value='" + recipes[i].name + "' >" + recipes[i].name + "</option>";
 					}
 				} else {
 					string = "<option>No recipes so far.</option>";
@@ -503,6 +633,7 @@ var main = function ( $ ) {
 			ajax.init();
 			websocket.init();
 			recipe.init();
+			settings.init();
 		}
 	};
 
