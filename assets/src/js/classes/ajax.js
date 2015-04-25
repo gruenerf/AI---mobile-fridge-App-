@@ -58,7 +58,7 @@ var ajax = (function ($) {
 		body.on('click', "#addNewRecipe", function () {
 			content.load("view/addNewRecipe.html", function () {
 				websocket.getRecipes();
-				date.init();
+				calendar.setUp();
 				recipe.addNew();
 			});
 		});

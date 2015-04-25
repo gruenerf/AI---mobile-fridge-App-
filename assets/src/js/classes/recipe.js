@@ -8,11 +8,6 @@
  * @return {Object} init-Function
  */
 
-
-/**
- * TODO function, that easch time the app start updates local storage regarding old recipes
- */
-
 var recipe = (function ($) {
 
 	/**
@@ -69,7 +64,7 @@ var recipe = (function ($) {
 			var date = $('#calendar').val();
 			var recipe = $("#select_recipe").val();
 			if (date !== undefined && recipe !== null) {
-				var counter = localStorage.recipes !== undefined ? retrieveRecipes()[retrieveRecipes().length - 1].id : 0;
+				var counter = (localStorage.recipes !== undefined && localStorage.recipes !== "")? retrieveRecipes()[retrieveRecipes().length - 1].id : 0;
 				var object = new Recipe(++counter, date, recipe);
 				localStorage.recipes = localStorage.recipes === undefined ? '' : localStorage.recipes;
 				localStorage.recipes += toJson(object) + ';';
@@ -98,7 +93,7 @@ var recipe = (function ($) {
 				string += "<tr class='recipe_item'>" +
 				"<td class='item_name'>" + recipeArray[i].name + "</td>" +
 				"<td class='item_date'>" + recipeArray[i].date + "</td>" +
-				"<td class='item_delete' data-id='" + recipeArray[i].id + "'>delete</td>" +
+				"<td class='item_delete' data-id='" + recipeArray[i].id + "'><img src='assets/dist/img/delete.png'></td>" +
 				"</tr>";
 			}
 		} else {
@@ -137,9 +132,47 @@ var recipe = (function ($) {
 		});
 	}
 
+	/**
+	 * Function that deletes all the old recipes
+	 * @returns {Array}
+	 */
+	function deleteOldRecipes() {
+		var recipeArray = retrieveRecipes();
+
+		recipeArray = $.grep(recipeArray, function (n) {
+			var dateDiff = calendar.dateDiff('d', new Date(), n.date);
+			return dateDiff >= 0;
+		});
+
+		localStorage.removeItem('recipes');
+		localStorage.recipes = '';
+
+		if (recipeArray.length) {
+			for (var i = 0; i < recipeArray.length; i++) {
+				localStorage.recipes += toJson(recipeArray[i]) + ';';
+			}
+		}
+	}
+
+	/**
+	 * Function that returns all Recipes in the set time frame
+	 * @returns {Array}
+	 */
+	function getRecipesForShoppingList() {
+		var recipeArray = retrieveRecipes();
+
+		recipeArray = $.grep(recipeArray, function (n) {
+			var dateDiff = calendar.dateDiff('d', new Date(), n.date);
+			return  dateDiff >= 0 && dateDiff <= localStorage.days;
+		});
+
+		return recipeArray;
+	}
+
 
 	return {
 		init: function () {
+			deleteOldRecipes();
 		},
 		addNew: function () {
 			addNew();
@@ -150,6 +183,9 @@ var recipe = (function ($) {
 		},
 		getAll: function () {
 			return retrieveRecipes();
+		},
+		getRecipesForShoppingList: function(){
+			return getRecipesForShoppingList();
 		}
 	};
 })(jQuery);

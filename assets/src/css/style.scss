@@ -280,8 +280,19 @@ body {
 
 			tr {
 				td {
+					font-size: 18px;
+					vertical-align: middle;
+
 					&:nth-child(2) {
 						border-right: 2px dashed $color_font;
+					}
+
+					&.item_delete{
+						text-align: center;
+
+						img{
+							max-height: 20px;
+						}
 					}
 				}
 

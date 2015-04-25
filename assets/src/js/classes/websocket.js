@@ -20,8 +20,7 @@ var websocket = (function ($) {
 			var websocket = new WebSocket('ws://37.235.60.89:9999/ws');
 
 			websocket.onerror = function (event) {
-				//throwConnectionError();
-				loadHomeScreen();
+				throwConnectionError();
 			};
 
 			return websocket;
@@ -65,9 +64,8 @@ var websocket = (function ($) {
 				if (socket.readyState === 1) {
 					loadHomeScreen();
 
-				} else if (times === 0) {
-					//throwConnectionError();
-					loadHomeScreen();
+				} else if (times === 30) {
+					throwConnectionError();
 				} else {
 					waitForSocketConnection(socket, ++times);
 				}
@@ -147,20 +145,24 @@ var websocket = (function ($) {
 	 * Returns the server Response with the current shoppinglist
 	 */
 	function getShoppingList() {
-		// Read localstorage for recipes TODO make them out of localstorage
 
-		var names = ["asd", "asdasdasd", "hurrs"];
+		// Read localstorage for recipes
+		var recipeArray = recipe.getRecipesForShoppingList();
 		var recipes = [];
 
-		names.forEach(function (name) {
+		// Make json string
+		if(recipeArray.length){
+			for (var i = 0; i < recipeArray.length; i++) {
 				var array = {};
-				array.name = name;
+				array.name = recipeArray[i].name;
 				recipes.push(array);
 			}
-		);
+		}
 
+		// Make complete JSON string
 		var recipeString = JSON.stringify({"get": "shoppingList", "recipes": recipes});
 
+		// Ask via websocket for shoppinglist
 		if (con.getInstance().readyState === 1) {
 			con.getInstance().send(recipeString);
 			con.getInstance().onmessage = function (msg) {

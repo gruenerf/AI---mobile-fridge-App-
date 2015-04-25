@@ -64,7 +64,7 @@ var ajax = (function ($) {
 		body.on('click', "#addNewRecipe", function () {
 			content.load("view/addNewRecipe.html", function () {
 				websocket.getRecipes();
-				date.init();
+				calendar.setUp();
 				recipe.addNew();
 			});
 		});
@@ -141,45 +141,55 @@ var ajax = (function ($) {
 	};
 
 })(jQuery);;/**
- * This file handels all date/calender related functions
+ * This file handels all date/calendar related functions
  *
- * @class date
+ * @class calendar
  * @static
  * @author Ferdinand Grüner
  * @version  1.0
  * @return {Object} init-Function
  */
 
-var date = (function ($) {
+var calendar = (function ($) {
+
 
 	/**
-	 * Initializing function
+	 * Function that defines the difference between two dates
+	 * @param datepart
+	 * @param fromdate
+	 * @param todate
+	 * @returns {number}
 	 */
-	function init() {
-		/**
-		 * Function that defines the difference between two dates
-		 * @param datepart
-		 * @param fromdate
-		 * @param todate
-		 * @returns {number}
-		 */
 
-		Date.dateDiff = function (datepart, fromdate, todate) {
-			datepart = datepart.toLowerCase();
-			//Difference in milliseconds
-			var diff = todate - fromdate;
-			var divideBy = {
-				w: 604800000,
-				d: 86400000,
-				h: 3600000,
-				n: 60000,
-				s: 1000
-			};
+	function dateDiff(datepart, fromDate, toDate) {
+		datepart = datepart.toLowerCase();
 
-			return Math.floor(diff / divideBy[datepart]) + 1;
+		var res = toDate.split(".");
+		var day = res[0];
+		var month = res[1] - 1;
+		var year = res[2];
+
+		//Difference in milliseconds
+		var diff = new Date(year, month, day) - fromDate;
+
+		var divideBy = {
+			w: 604800000,
+			d: 86400000,
+			h: 3600000,
+			n: 60000,
+			s: 1000
 		};
 
-		//Datepicker UI settings
+		return Math.floor(diff / divideBy[datepart]) + 1;
+	}
+
+	/**
+	 * Initializes Datepicker
+	 */
+	function setUpDatepicker() {
+		/**
+		 * Initialize datepicker
+		 */
 		$('#calendar').datepicker({
 			inline: true,
 			firstDay: 1,
@@ -193,8 +203,11 @@ var date = (function ($) {
 	}
 
 	return {
-		init: function () {
-			init();
+		dateDiff: function (datepart, fromDate, toDate) {
+			return dateDiff(datepart, fromDate, toDate);
+		},
+		setUp: function () {
+			setUpDatepicker();
 		}
 	};
 })(jQuery);;/**
@@ -205,11 +218,6 @@ var date = (function ($) {
  * @author Ferdinand Grüner
  * @version  1.0
  * @return {Object} init-Function
- */
-
-
-/**
- * TODO function, that easch time the app start updates local storage regarding old recipes
  */
 
 var recipe = (function ($) {
@@ -268,7 +276,7 @@ var recipe = (function ($) {
 			var date = $('#calendar').val();
 			var recipe = $("#select_recipe").val();
 			if (date !== undefined && recipe !== null) {
-				var counter = localStorage.recipes !== undefined ? retrieveRecipes()[retrieveRecipes().length - 1].id : 0;
+				var counter = (localStorage.recipes !== undefined && localStorage.recipes !== "")? retrieveRecipes()[retrieveRecipes().length - 1].id : 0;
 				var object = new Recipe(++counter, date, recipe);
 				localStorage.recipes = localStorage.recipes === undefined ? '' : localStorage.recipes;
 				localStorage.recipes += toJson(object) + ';';
@@ -297,7 +305,7 @@ var recipe = (function ($) {
 				string += "<tr class='recipe_item'>" +
 				"<td class='item_name'>" + recipeArray[i].name + "</td>" +
 				"<td class='item_date'>" + recipeArray[i].date + "</td>" +
-				"<td class='item_delete' data-id='" + recipeArray[i].id + "'>delete</td>" +
+				"<td class='item_delete' data-id='" + recipeArray[i].id + "'><img src='assets/dist/img/delete.png'></td>" +
 				"</tr>";
 			}
 		} else {
@@ -336,9 +344,47 @@ var recipe = (function ($) {
 		});
 	}
 
+	/**
+	 * Function that deletes all the old recipes
+	 * @returns {Array}
+	 */
+	function deleteOldRecipes() {
+		var recipeArray = retrieveRecipes();
+
+		recipeArray = $.grep(recipeArray, function (n) {
+			var dateDiff = calendar.dateDiff('d', new Date(), n.date);
+			return dateDiff >= 0;
+		});
+
+		localStorage.removeItem('recipes');
+		localStorage.recipes = '';
+
+		if (recipeArray.length) {
+			for (var i = 0; i < recipeArray.length; i++) {
+				localStorage.recipes += toJson(recipeArray[i]) + ';';
+			}
+		}
+	}
+
+	/**
+	 * Function that returns all Recipes in the set time frame
+	 * @returns {Array}
+	 */
+	function getRecipesForShoppingList() {
+		var recipeArray = retrieveRecipes();
+
+		recipeArray = $.grep(recipeArray, function (n) {
+			var dateDiff = calendar.dateDiff('d', new Date(), n.date);
+			return  dateDiff >= 0 && dateDiff <= localStorage.days;
+		});
+
+		return recipeArray;
+	}
+
 
 	return {
 		init: function () {
+			deleteOldRecipes();
 		},
 		addNew: function () {
 			addNew();
@@ -349,6 +395,9 @@ var recipe = (function ($) {
 		},
 		getAll: function () {
 			return retrieveRecipes();
+		},
+		getRecipesForShoppingList: function(){
+			return getRecipesForShoppingList();
 		}
 	};
 })(jQuery);;/**
@@ -425,8 +474,7 @@ var websocket = (function ($) {
 			var websocket = new WebSocket('ws://37.235.60.89:9999/ws');
 
 			websocket.onerror = function (event) {
-				//throwConnectionError();
-				loadHomeScreen();
+				throwConnectionError();
 			};
 
 			return websocket;
@@ -470,9 +518,8 @@ var websocket = (function ($) {
 				if (socket.readyState === 1) {
 					loadHomeScreen();
 
-				} else if (times === 0) {
-					//throwConnectionError();
-					loadHomeScreen();
+				} else if (times === 30) {
+					throwConnectionError();
 				} else {
 					waitForSocketConnection(socket, ++times);
 				}
@@ -552,20 +599,24 @@ var websocket = (function ($) {
 	 * Returns the server Response with the current shoppinglist
 	 */
 	function getShoppingList() {
-		// Read localstorage for recipes TODO make them out of localstorage
 
-		var names = ["asd", "asdasdasd", "hurrs"];
+		// Read localstorage for recipes
+		var recipeArray = recipe.getRecipesForShoppingList();
 		var recipes = [];
 
-		names.forEach(function (name) {
+		// Make json string
+		if(recipeArray.length){
+			for (var i = 0; i < recipeArray.length; i++) {
 				var array = {};
-				array.name = name;
+				array.name = recipeArray[i].name;
 				recipes.push(array);
 			}
-		);
+		}
 
+		// Make complete JSON string
 		var recipeString = JSON.stringify({"get": "shoppingList", "recipes": recipes});
 
+		// Ask via websocket for shoppinglist
 		if (con.getInstance().readyState === 1) {
 			con.getInstance().send(recipeString);
 			con.getInstance().onmessage = function (msg) {
