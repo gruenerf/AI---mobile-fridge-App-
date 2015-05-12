@@ -146,6 +146,7 @@ body {
 	}
 
 	header {
+		z-index: 200;
 		top: 0;
 		right: 0;
 		width: 100%;
@@ -220,7 +221,6 @@ body {
 					}
 				}
 			}
-
 		}
 
 		.fridge_list {
@@ -234,6 +234,7 @@ body {
 				height: 200px;
 				border: 1px solid black;
 				border-radius: 5px;
+				overflow: hidden;
 
 				.item_data {
 					position: absolute;

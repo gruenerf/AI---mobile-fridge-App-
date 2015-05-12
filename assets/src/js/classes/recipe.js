@@ -27,15 +27,19 @@ var recipe = (function ($) {
 	 * @returns {Array}
 	 */
 	function retrieveRecipes() {
-		var storageString = localStorage.recipes;
-		var splitString = storageString.split(";");
-		var storageArray = [];
-		for (var i = 0; i < splitString.length; i++) {
-			if (splitString[i] !== '') {
-				storageArray.push(getJson(splitString[i]));
+		if(localStorage.recipes !== undefined){
+			var storageString = localStorage.recipes;
+			var splitString = storageString.split(";");
+			var storageArray = [];
+			for (var i = 0; i < splitString.length; i++) {
+				if (splitString[i] !== '') {
+					storageArray.push(getJson(splitString[i]));
+				}
 			}
+			return storageArray;
 		}
-		return storageArray;
+
+		return [];
 	}
 
 	/**
@@ -102,7 +106,7 @@ var recipe = (function ($) {
 			"</tr>";
 		}
 
-		$(".recipe_list").append(string);
+		$("#recipe_list").append(string);
 	}
 
 	/**

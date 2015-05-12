@@ -18,6 +18,7 @@ var websocket = (function ($) {
 
 		function createInstance() {
 			var websocket = new WebSocket('ws://37.235.60.89:9999/ws');
+			//var websocket = new WebSocket('ws://192.168.0.1:9999/ws');
 
 			websocket.onerror = function (event) {
 				throwConnectionError();
@@ -125,7 +126,7 @@ var websocket = (function ($) {
 						string += "<div class='fridge_item'>" +
 						"<div class='item_data'>" +
 						"<div class='item_name'>" + fridgeItems[i].name + "</div>" +
-						"<div class='item_size'>" + (fridgeItems[i].size * fridgeItems[i].percentage / 100) + fridgeItems[i].unit + "</div>" +
+						"<div class='item_size'>" + Math.round((fridgeItems[i].size * fridgeItems[i].percentage / 100)*100)/100 + fridgeItems[i].unit + "</div>" +
 						"</div>" +
 						"<div class='item_percentage' style='height:" + fridgeItems[i].percentage + "%'></div>" +
 						"</div>";

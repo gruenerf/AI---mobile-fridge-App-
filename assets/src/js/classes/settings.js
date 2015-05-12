@@ -16,7 +16,12 @@ var settings = (function ($) {
 	 * Initializing function
 	 */
 	function init() {
-		localStorage.days = localStorage.days === undefined ? 7 : localStorage.days;
+		if (localStorage.days) {
+			localStorage.days = localStorage.days === undefined ? 7 : localStorage.days;
+		}
+		else {
+			localStorage.days = 7;
+		}
 	}
 
 	/**
@@ -25,8 +30,8 @@ var settings = (function ($) {
 	function setSettings() {
 		$("#number_input").val(localStorage.days);
 
-		$("#settings_save").click(function(){
-			localStorage.days =  $("#number_input").val();
+		$("#settings_save").click(function () {
+			localStorage.days = $("#number_input").val();
 			ajax.loadSettings();
 		});
 	}
@@ -46,7 +51,7 @@ var settings = (function ($) {
 		setSettings: function () {
 			setSettings();
 		},
-		update: function(){
+		update: function () {
 			update();
 		}
 	};

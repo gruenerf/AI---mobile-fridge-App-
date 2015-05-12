@@ -16,10 +16,10 @@ var main = function ( $ ) {
 
 	return {
 		init : function() {
+			settings.init();
 			ajax.init();
 			websocket.init();
 			recipe.init();
-			settings.init();
 		}
 	};
 
@@ -27,5 +27,22 @@ var main = function ( $ ) {
 
 
 jQuery(document).ready(function() {
+
+	// Cordova eventbinding on the backkey of the phone
+	function onBackKeyDown() {
+		var content = jQuery('#content');
+
+		if(content.hasClass('home')){
+			navigator.app.exitApp();
+		}else if(content.hasClass('addNewRecipe')){
+			ajax.loadRecipes();
+		}else{
+			ajax.loadHome();
+		}
+	}
+
+	document.addEventListener("backbutton", onBackKeyDown, false);
+
 	main.init();
 });
+

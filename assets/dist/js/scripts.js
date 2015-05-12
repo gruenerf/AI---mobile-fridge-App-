@@ -33,36 +33,41 @@ var ajax = (function ($) {
 
 		body.on('click', "#home", function () {
 			content.load("view/home.html", function () {
-
+				content.attr('class', 'content home');
 			});
 		});
 
 		body.on('click', "#recipes", function () {
 			content.load("view/recipes.html", function () {
+				content.attr('class', 'content recipes');
 				recipe.recipe();
 			});
 		});
 
 		body.on('click', "#fridge", function () {
 			content.load("view/fridge.html", function () {
+				content.attr('class', 'content fridge');
 				websocket.getFridgeItems();
 			});
 		});
 
 		body.on('click', "#shoppinglist", function () {
 			content.load("view/shoppinglist.html", function () {
+				content.attr('class', 'content shoppingList');
 				websocket.getShoppingList();
 			});
 		});
 
 		body.on('click', "#settings", function () {
 			content.load("view/settings.html", function () {
+				content.attr('class', 'content settings');
 				settings.setSettings();
 			});
 		});
 
 		body.on('click', "#addNewRecipe", function () {
 			content.load("view/addNewRecipe.html", function () {
+				content.attr('class', 'content addNewRecipe');
 				websocket.getRecipes();
 				calendar.setUp();
 				recipe.addNew();
@@ -99,12 +104,24 @@ var ajax = (function ($) {
 	}
 
 	/**
+	 * Loads the Home
+	 */
+	function loadHome(){
+		var content = $("#content");
+
+		content.load("view/home.html", function () {
+			content.attr('class', 'content home');
+		});
+	}
+
+	/**
 	 * Loads an Recipe screen
 	 */
 	function loadRecipes() {
 		var content = $("#content");
 
 		content.load("view/recipes.html", function () {
+			content.attr('class', 'content recipes');
 			recipe.recipe();
 		});
 	}
@@ -116,6 +133,7 @@ var ajax = (function ($) {
 		var content = $("#content");
 
 		content.load("view/settings.html", function () {
+			content.attr('class', 'content settings');
 			settings.setSettings();
 			settings.update();
 		});
@@ -131,6 +149,9 @@ var ajax = (function ($) {
 		},
 		loadHomeScreen: function () {
 			loadHomeScreen();
+		},
+		loadHome: function () {
+			loadHome();
 		},
 		loadRecipes: function () {
 			loadRecipes();
@@ -239,15 +260,19 @@ var recipe = (function ($) {
 	 * @returns {Array}
 	 */
 	function retrieveRecipes() {
-		var storageString = localStorage.recipes;
-		var splitString = storageString.split(";");
-		var storageArray = [];
-		for (var i = 0; i < splitString.length; i++) {
-			if (splitString[i] !== '') {
-				storageArray.push(getJson(splitString[i]));
+		if(localStorage.recipes !== undefined){
+			var storageString = localStorage.recipes;
+			var splitString = storageString.split(";");
+			var storageArray = [];
+			for (var i = 0; i < splitString.length; i++) {
+				if (splitString[i] !== '') {
+					storageArray.push(getJson(splitString[i]));
+				}
 			}
+			return storageArray;
 		}
-		return storageArray;
+
+		return [];
 	}
 
 	/**
@@ -314,7 +339,7 @@ var recipe = (function ($) {
 			"</tr>";
 		}
 
-		$(".recipe_list").append(string);
+		$("#recipe_list").append(string);
 	}
 
 	/**
@@ -418,7 +443,12 @@ var settings = (function ($) {
 	 * Initializing function
 	 */
 	function init() {
-		localStorage.days = localStorage.days === undefined ? 7 : localStorage.days;
+		if (localStorage.days) {
+			localStorage.days = localStorage.days === undefined ? 7 : localStorage.days;
+		}
+		else {
+			localStorage.days = 7;
+		}
 	}
 
 	/**
@@ -427,8 +457,8 @@ var settings = (function ($) {
 	function setSettings() {
 		$("#number_input").val(localStorage.days);
 
-		$("#settings_save").click(function(){
-			localStorage.days =  $("#number_input").val();
+		$("#settings_save").click(function () {
+			localStorage.days = $("#number_input").val();
 			ajax.loadSettings();
 		});
 	}
@@ -448,7 +478,7 @@ var settings = (function ($) {
 		setSettings: function () {
 			setSettings();
 		},
-		update: function(){
+		update: function () {
 			update();
 		}
 	};
@@ -472,6 +502,7 @@ var websocket = (function ($) {
 
 		function createInstance() {
 			var websocket = new WebSocket('ws://37.235.60.89:9999/ws');
+			//var websocket = new WebSocket('ws://192.168.0.1:9999/ws');
 
 			websocket.onerror = function (event) {
 				throwConnectionError();
@@ -579,7 +610,7 @@ var websocket = (function ($) {
 						string += "<div class='fridge_item'>" +
 						"<div class='item_data'>" +
 						"<div class='item_name'>" + fridgeItems[i].name + "</div>" +
-						"<div class='item_size'>" + (fridgeItems[i].size * fridgeItems[i].percentage / 100) + fridgeItems[i].unit + "</div>" +
+						"<div class='item_size'>" + Math.round((fridgeItems[i].size * fridgeItems[i].percentage / 100)*100)/100 + fridgeItems[i].unit + "</div>" +
 						"</div>" +
 						"<div class='item_percentage' style='height:" + fridgeItems[i].percentage + "%'></div>" +
 						"</div>";
@@ -681,10 +712,10 @@ var main = function ( $ ) {
 
 	return {
 		init : function() {
+			settings.init();
 			ajax.init();
 			websocket.init();
 			recipe.init();
-			settings.init();
 		}
 	};
 
@@ -692,5 +723,22 @@ var main = function ( $ ) {
 
 
 jQuery(document).ready(function() {
+
+	// Cordova eventbinding on the backkey of the phone
+	function onBackKeyDown() {
+		var content = jQuery('#content');
+
+		if(content.hasClass('home')){
+			navigator.app.exitApp();
+		}else if(content.hasClass('addNewRecipe')){
+			ajax.loadRecipes();
+		}else{
+			ajax.loadHome();
+		}
+	}
+
+	document.addEventListener("backbutton", onBackKeyDown, false);
+
 	main.init();
 });
+
