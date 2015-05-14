@@ -501,8 +501,8 @@ var websocket = (function ($) {
 		var con;
 
 		function createInstance() {
-			var websocket = new WebSocket('ws://37.235.60.89:9999/ws');
-			//var websocket = new WebSocket('ws://192.168.0.1:9999/ws');
+			//var websocket = new WebSocket('ws://37.235.60.89:9999/ws');
+			var websocket = new WebSocket('ws://192.168.0.1:9999/ws');
 
 			websocket.onerror = function (event) {
 				throwConnectionError();
@@ -610,7 +610,7 @@ var websocket = (function ($) {
 						string += "<div class='fridge_item'>" +
 						"<div class='item_data'>" +
 						"<div class='item_name'>" + fridgeItems[i].name + "</div>" +
-						"<div class='item_size'>" + Math.round((fridgeItems[i].size * fridgeItems[i].percentage / 100)*100)/100 + fridgeItems[i].unit + "</div>" +
+						"<div class='item_size'>" + fridgeItems[i].size + fridgeItems[i].unit + "</div>" +
 						"</div>" +
 						"<div class='item_percentage' style='height:" + fridgeItems[i].percentage + "%'></div>" +
 						"</div>";
@@ -658,16 +658,22 @@ var websocket = (function ($) {
 				var shoppingList = response.shoppingList;
 
 				if (shoppingList.length) {
+					 string += "<tr>"+
+									"<td>Item</td>"+
+									"<td>Amount</td>"+
+								"</tr>";
 					for (var i = 0; i < shoppingList.length; i++) {
-						string += "<tr>" +
-						"<td class='item_name'>" + shoppingList[i].name + "</td>" +
-						"<td class='item_size'>" + shoppingList[i].size + shoppingList[i].unit + "</td>" +
-						"</tr>";
+						if(shoppingList[i].size !== 0) {
+							string += "<tr>" +
+							"<td class='item_name'>" + shoppingList[i].name + "</td>" +
+							"<td class='item_size'>" + shoppingList[i].size + shoppingList[i].unit + "</td>" +
+							"</tr>";
+						}
 					}
 				} else {
-					string = "<tr>" +
-					"<td class='item_name'>No recommendations so far.</td>" +
-					"</tr>";
+					string = "<tr class='no_items'>" +
+								"<td>No recommendations so far.</td>" +
+							 "</tr>";
 				}
 
 				shopping_list.append(string);

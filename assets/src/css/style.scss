@@ -272,6 +272,14 @@ body {
 						border-right: 2px dashed $color_font;
 					}
 				}
+
+				&.no_items {
+					td {
+						border-bottom: none;
+						border-right: none;
+						text-align: center;
+					}
+				}
 			}
 		}
 
@@ -294,14 +302,6 @@ body {
 						img{
 							max-height: 20px;
 						}
-					}
-				}
-
-				&.no_items {
-					td {
-						border-bottom: none;
-						border-right: none;
-						text-align: center;
 					}
 				}
 			}
